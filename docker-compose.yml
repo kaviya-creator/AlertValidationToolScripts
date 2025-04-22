@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+
+  metasploitable:
+    image: tleemcjr/metasploitable2
+    container_name: metasploitable
+    privileged: true
+    restart: unless-stopped
+    networks:
+      - pentest-net
+    ports:
+      - "2222:22"
+      - "5900:5900"
+      - "21:21"
+      - "139:139"
+      - "445:445"
+      - "3306:3306"
+      - "5432:5432"
+      - "8180:8180"
+      - "8080:8080"
+      - "6667:6667"
+    command: ["/bin/bash"]
+    tty: true
+
+  dvwa:
+    image: vulnerables/web-dvwa
+    container_name: dvwa
+    restart: unless-stopped
+    networks:
+      - pentest-net
+    ports:
+      - "8000:80"
+
+  mysql:
+    image: mysql:5.7
+    container_name: dvwa-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dvwa
+      MYSQL_USER: dvwa
+      MYSQL_PASSWORD: password
+    networks:
+      - pentest-net
+
+  apache-struts:
+    image: medicean/vulapps:s_struts2_s2-045
+    container_name: apache-struts-s2-045
+    restart: unless-stopped
+    networks:
+      - pentest-net
+    ports:
+      - "8081:8080"  # Runs on port 8081 to avoid conflicts with metasploitable
+    environment:
+      - JAVA_OPTS=-Dfile.encoding=UTF-8
+
+networks:
+  pentest-net:
+    driver: bridge
